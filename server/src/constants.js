@@ -1,0 +1,3 @@
+export default {
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+};
