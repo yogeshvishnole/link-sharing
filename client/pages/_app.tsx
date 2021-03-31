@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { AppProps } from "next/app";
-import Head from "next/head";
 import Router from "next/router";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { theme } from "styles/theme";
@@ -16,8 +15,6 @@ Router.events.on("routeChangeComplete", () => NProgress.done());
 Router.events.on("routeChangeError", () => NProgress.done());
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
-  const [value, setValue] = useState(0);
-
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles) {
@@ -27,7 +24,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <Component {...pageProps} value={value} setValue={setValue} />
+      <Component {...pageProps} />
     </MuiThemeProvider>
   );
 };

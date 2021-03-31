@@ -3,4 +3,5 @@ export default {
   EMAIL_EXPIRATION_TIME: '10m',
   UNKNOWN_ERROR_STATUS: 'error',
   KNOWN_ERROR_STATUS: 'fail',
+  SUCCESS_STATUS: 'success',
 };

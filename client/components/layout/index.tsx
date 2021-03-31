@@ -1,23 +1,38 @@
 /* tslint:disable */
 import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import clsx from "clsx";
-import Link from "components/link";
+import Link from "next/link";
 import AppBar from "@material-ui/core/AppBar";
 import ToolBar from "@material-ui/core/Toolbar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
+import { List, ListItem, ListItemText, Container } from "@material-ui/core";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
+import { authenticate, isAuth, logout } from "utils/auth";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
     navBarStyles: {
-      backgroundColor: "#FEC134",
+      backgroundColor: theme.palette.primary.main,
     },
     elevation0: {
       boxShadow: "0 0 0 0",
     },
     toolbarMargin: {
       marginBottom: "4em",
+    },
+    activeTab: {
+      color: theme.palette.secondary.main,
+    },
+    navDisplayFlex: {
+      display: "flex",
+      flex: 1,
+      color: "#524f4f",
+      justifyContent: "space-betweeen",
+    },
+    listItem: {
+      width: "auto",
+    },
+    floatRight: {
+      marginLeft: "auto",
     },
   })
 );
@@ -37,45 +52,107 @@ const routes = [
   { name: "register", link: "/register", activeIndex: 3 },
 ];
 
-interface Props {
-  value: number;
-  setValue: Dispatch<SetStateAction<number>>;
-}
+interface Props {}
 
-const Layout: React.FC<Props> = ({ children, value, setValue }) => {
-  useEffect(() => {
-    routes.forEach((route) => {
-      switch (window.location.pathname) {
-        case `${route.link}`:
-          setValue(route.activeIndex);
-          break;
-        default:
-          break;
-      }
-    });
-  }, [routes]);
+const Layout: React.FC<Props> = ({ children }) => {
+  // useEffect(() => {
+  //   routes.forEach((route) => {
+  //     switch (window.location.pathname) {
+  //       case `${route.link}`:
+  //         setValue(route.activeIndex);
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   });
+  // }, [routes]);
+
+  const authenticated = isAuth();
 
   const classes = useStyles();
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
-  };
+  // const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  //   setValue(newValue);
+  // };
 
   const Navigation = () => {
     return (
       <>
         <AppBar className={clsx(classes.navBarStyles, classes.elevation0)}>
           <ToolBar>
-            <Tabs value={value} onChange={handleChange}>
+            <List
+              component="nav"
+              aria-labelledby="main navigation"
+              className={classes.navDisplayFlex}
+            >
+              <Link href="/">
+                <ListItem button className={classes.listItem}>
+                  <ListItemText primary={"HOME"} />
+                </ListItem>
+              </Link>
+              <Link href="/submit-a-link">
+                <ListItem button className={classes.listItem}>
+                  <ListItemText primary={"SUBMIT A LINK"} />
+                </ListItem>
+              </Link>
+              {!authenticated && (
+                <>
+                  <Link href="/login">
+                    <ListItem
+                      button
+                      className={clsx(classes.listItem, classes.floatRight)}
+                    >
+                      <ListItemText primary={"LOGIN"} />
+                    </ListItem>
+                  </Link>
+                  <Link href="/register">
+                    <ListItem button className={classes.listItem}>
+                      <ListItemText primary={"REGISTER"} />
+                    </ListItem>
+                  </Link>
+                </>
+              )}
+              {authenticated && authenticated.role === "admin" && (
+                <Link href="/admin">
+                  <ListItem
+                    button
+                    className={clsx(classes.listItem, classes.floatRight)}
+                  >
+                    <ListItemText primary={"ADMIN"} />
+                  </ListItem>
+                </Link>
+              )}
+              {authenticated && authenticated.role === "subscriber" && (
+                <Link href="/user">
+                  <ListItem
+                    button
+                    className={clsx(classes.listItem, classes.floatRight)}
+                  >
+                    <ListItemText primary={"USER"} />
+                  </ListItem>
+                </Link>
+              )}
+              {authenticated && (
+                <ListItem
+                  button
+                  className={clsx(classes.listItem)}
+                  onClick={logout}
+                >
+                  <ListItemText primary={"LOGOUT"} />
+                </ListItem>
+              )}
+            </List>
+            {/* <Tabs value={value} onChange={handleChange}>
               {routes.map((route) => (
                 <Tab
+                  classes={{ selected: classes.activeTab }}
                   key={route.activeIndex}
                   label={route.name}
                   component={Link}
                   href={route.link}
                 />
               ))}
-            </Tabs>
+            </Tabs> */}
           </ToolBar>
         </AppBar>
         <div className={classes.toolbarMargin}></div>
@@ -85,7 +162,9 @@ const Layout: React.FC<Props> = ({ children, value, setValue }) => {
   return (
     <>
       {Navigation()}
-      {children}
+      <Container maxWidth="md" style={{ paddingTop: "30px" }}>
+        {children}
+      </Container>
     </>
   );
 };

@@ -1,26 +1,25 @@
 import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Layout } from "components";
 import { Grid, Box, Typography, Button } from "@material-ui/core";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import axios from "axios";
 import * as Yup from "yup";
 
 import { FormikField } from "components/";
+import { isAuth } from "utils/auth";
 
-interface RegisterProps {
-  value: number;
-  setValue: Dispatch<SetStateAction<number>>;
-}
+interface RegisterProps {}
 
-interface FormValues {
+interface FormValuesType {
   name: string;
   email: string;
   password: string;
 }
 
-const initialValues: FormValues = {
+const initialValues: FormValuesType = {
   name: "",
   email: "",
   password: "",
@@ -37,6 +36,9 @@ const Register: React.FC<RegisterProps> = (props) => {
   const [success, setSuccess] = useState("");
   const [buttonText, setButtonText] = useState("Register");
 
+  const classes = useStyles();
+  const router = useRouter();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (success || error) {
@@ -47,20 +49,21 @@ const Register: React.FC<RegisterProps> = (props) => {
     return () => clearTimeout(timer);
   }, [error, success]);
 
-  const classes = useStyles();
+  useEffect(() => {
+    if (isAuth()) {
+      router.push("/");
+    }
+  }, [isAuth]);
 
-  const handleSubmit = async (values: FormValues, { resetForm }) => {
+  const handleSubmit = async (values: FormValuesType, { resetForm }) => {
     setButtonText("Submitting");
     const { name, email, password } = values;
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
-        {
-          name,
-          email,
-          password,
-        }
-      );
+      const res = await axios.post(`/api/v1/auth/register`, {
+        name,
+        email,
+        password,
+      });
       resetForm({
         values: {
           name: "",
@@ -77,14 +80,10 @@ const Register: React.FC<RegisterProps> = (props) => {
   };
 
   return (
-    <Layout {...props}>
+    <Layout>
       <Grid container direction="column" justify="center" alignItems="center">
-        <Box className={classes.formBox}>
-          <Typography
-            component="h1"
-            variant="h4"
-            className={classes.registerHead}
-          >
+        <Box className="formBox">
+          <Typography component="h1" variant="h4" className="formHead">
             Register
           </Typography>
           {error && <Alert severity="error">{error}</Alert>}
@@ -116,7 +115,8 @@ const Register: React.FC<RegisterProps> = (props) => {
                   />
                 </Grid>
                 <Button
-                  className={classes.submit}
+                  variant="contained"
+                  color="primary"
                   disabled={!dirty || !isValid}
                   type="submit"
                 >
@@ -130,24 +130,5 @@ const Register: React.FC<RegisterProps> = (props) => {
     </Layout>
   );
 };
-
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    formBox: {
-      marginTop: "2rem",
-      width: "50%",
-    },
-    registerHead: {
-      marginBottom: "20px",
-    },
-    submit: {
-      backgroundColor: "#FEC134",
-      color: "#fff !important",
-      "&:hover": {
-        backgroundColor: "#EEC134",
-      },
-    },
-  })
-);
 
 export default Register;

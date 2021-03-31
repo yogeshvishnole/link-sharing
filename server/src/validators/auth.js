@@ -7,3 +7,25 @@ export const userRegisterValidator = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
 ];
+
+export const userLoginValidator = [
+  check('email')
+    .not()
+    .isEmpty()
+    .withMessage('Please provide email and password'),
+  check('password')
+    .not()
+    .isEmpty()
+    .withMessage('Please provide email and password'),
+];
+
+export const forgotPasswordValidator = [
+  check('email').isEmail().withMessage('Must be a valid email address.'),
+];
+
+export const resetPasswordValidator = [
+  check('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least  6 characters long.'),
+  check('resetPasswordLink').not().isEmpty().withMessage('Token is required'),
+];

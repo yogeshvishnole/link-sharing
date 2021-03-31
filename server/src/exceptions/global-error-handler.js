@@ -2,10 +2,16 @@ import BusinessError from './business-error';
 import constants from '../constants';
 
 const handleUnverifiedEmailError = () => {
-  const message = `We could not verify ypu email. Please try again`;
+  const message = `We could not verify your email. Please try again`;
   const err = new BusinessError(400, message);
   return err;
 };
+
+const handleJWTExpirationError = () =>
+  new BusinessError('Your token has expired ! please try again ', 401);
+
+const handleJWTError = () =>
+  new BusinessError('Invalid token, please log in again', 401);
 
 const sendErrorDev = (err, req, res) => {
   return res.status(err.statusCode).json({
@@ -41,6 +47,13 @@ export default (err, req, res, next) => {
     let error = { ...err };
     if (error.code === 'MessageRejected') {
       error = handleUnverifiedEmailError();
+    }
+    if (error.name === 'TokenExpiredError') {
+      error = handleJWTExpirationError();
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+      error = handleJWTError();
     }
     sendErrorProd(error, req, res);
   }

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto'
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,10 +7,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 12,
+      maxlength: 50,
       unique: true,
       index: true,
       lowercase: true,
+    },
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+      max: 32,
     },
     email: {
       type: String,
@@ -22,16 +28,23 @@ const userSchema = new mongoose.Schema(
     hashed_password: {
       type: String,
       required: true,
+      select: false,
     },
-    salt: String,
+    salt: {
+      type: String,
+      select: false,
+    },
     resetPasswordLink: {
       type: String,
       default: '',
+      select: false,
     },
     role: {
       type: String,
+      enum: ['admin', 'subscriber'],
       default: 'subscriber',
     },
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
@@ -46,7 +59,7 @@ userSchema
     // generate salt
     this.salt = this.makeSalt();
     // encrypt password
-    this.hashed_password = this.encrypt_password(password);
+    this.hashed_password = this.encryptPassword(password);
   })
   .get(function () {
     return this._password;
@@ -54,23 +67,28 @@ userSchema
 
 userSchema.methods = {
   authenticate: function (plainText) {
-    return this.encrypt_password(plainText) === this.hashed_password;
+    return this.encryptPassword(plainText) === this.hashed_password;
   },
 
   makeSalt: function () {
     return Math.round(new Date().valueOf() * Math.random()) + '';
   },
 
-  encrypt_password: function (password) {
+  encryptPassword: function (password) {
     if (!password) return '';
-    try {
-      return crypto
-        .createHmac('sha1', this.salt)
-        .update(password)
-        .digest('hex');
-    } catch (err) {
-      return '';
+    return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
+  },
+
+  changedPasswordAfter: function (JWTTimeStamp) {
+    if (this.passwordChangedAt) {
+      const changedTimeStamp = parseInt(
+        this.passwordChangedAt.getTime() / 1000,
+        10,
+      );
+      // console.log(changedtimestamp, JWTTimestamp);
+      return JWTTimeStamp < changedTimeStamp;
     }
+    return false;
   },
 };
 

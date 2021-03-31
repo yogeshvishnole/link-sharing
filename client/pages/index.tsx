@@ -1,8 +1,8 @@
 import { Layout } from "components";
 
-const Home = ({ value, setValue }) => {
+const Home = () => {
   return (
-    <Layout value={value} setValue={setValue}>
+    <Layout>
       <h1>Hello Everyone jai ram ji ki</h1>
     </Layout>
   );

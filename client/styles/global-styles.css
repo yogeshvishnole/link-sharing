@@ -7,6 +7,14 @@
   background-color: #fec134 !important;
 }
 
-	.MuiFormHelperText-root{
-    color:red !important;
-  }
+.MuiFormHelperText-root {
+  color: red !important;
+}
+
+.formBox {
+  width: 50%;
+}
+
+.formHead {
+  margin-bottom: 20px;
+}

@@ -1,6 +1,12 @@
 import ses from '../services/aws-ses';
-import { emailVerificationTemplate } from './email-templates';
-import { EMAIL_VERIFICATION_SUBJECT } from './email-subjects.js';
+import {
+  emailVerificationTemplate,
+  emailResetPasswordTemplate,
+} from './email-templates';
+import {
+  EMAIL_VERIFICATION_SUBJECT,
+  RESET_PASSWORD_SUBJECT,
+} from './email-subjects.js';
 
 // In this class we can use open closed principle
 export default class Email {
@@ -37,6 +43,14 @@ export default class Email {
     const params = this.constructParams(
       emailVerificationTemplate,
       EMAIL_VERIFICATION_SUBJECT,
+    );
+    return await this.send(params);
+  }
+
+  async sendResetPassword() {
+    const params = this.constructParams(
+      emailResetPasswordTemplate,
+      RESET_PASSWORD_SUBJECT,
     );
     return await this.send(params);
   }
