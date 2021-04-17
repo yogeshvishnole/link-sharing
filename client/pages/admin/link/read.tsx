@@ -1,36 +1,55 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { pipeProps } from "next-pipe-props";
-import Link from "next/link";
+import axios from "axios";
 import {
   Grid,
   Typography,
-  Divider,
-  ListItem,
-  List,
   Card,
   CardContent,
-  Chip,
   Badge,
+  Chip,
+  Button,
 } from "@material-ui/core";
+import InfiniteScroll from "react-infinite-scroller";
 import moment from "moment";
-import axios from "axios";
 
-import { roleSubscriber, withUser } from "utils/pipeFunctions";
-import { Layout } from "../../components";
+import Layout from "../../../components/layout";
+import { withUser, roleAdmin } from "../../../utils/pipeFunctions";
 
-interface Props {}
-
-const User: InferGetServerSidePropsType<typeof getServerSideProps> = ({
-  user,
-  userLinks,
+const AllLinksAdmin = ({
+  query,
   token,
-}) => {
-  const [linkState, setLinkState] = useState(userLinks);
+  links,
+  linkLimit,
+  linkSkip,
+  totalLinks,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [allLinks, setAllLinks] = useState(links);
+  const [limit, setLimit] = useState(linkLimit);
+  const [skip, setSkip] = useState(linkSkip);
+  const [linkCount, setLinkCount] = useState(totalLinks);
+
+  const loadMore = async () => {
+    let toSkip = skip + limit;
+    const response = await axios.post(
+      `/api/v1/links/getAll`,
+      { skip: toSkip, limit },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setAllLinks([...allLinks, ...response.data.data.links]);
+    setLinkCount(response.data.data.links.length);
+    setSkip(toSkip);
+  };
 
   const confirmDelete = async (id) => {
     const answer = window.confirm(
-      "Are you sure you wanted to delete ths link  ? "
+      "Are you sure you wanted to delete this link  ? "
     );
     if (answer) {
       const response = await axios.delete(`/api/v1/links/${id}`, {
@@ -39,15 +58,15 @@ const User: InferGetServerSidePropsType<typeof getServerSideProps> = ({
           "content-type": "application/json",
         },
       });
-      loadUserLinks();
+      process.browser && window.location.reload();
     }
   };
 
-  const showListLinks = () => {
+  const showLinks = () => {
     return (
       <Grid container direction="column" spacing={2}>
-        {linkState &&
-          linkState.map((link, i) => {
+        {allLinks &&
+          allLinks.map((link, i) => {
             return (
               <Grid item>
                 <Card style={{ backgroundColor: "#D1ECF1" }}>
@@ -64,15 +83,11 @@ const User: InferGetServerSidePropsType<typeof getServerSideProps> = ({
                         </a>
                       </Grid>
                       <Grid container item xs={4} justify="flex-end">
-                        <Grid item>
-                          <Typography style={{ fontSize: "14px" }}>
-                            {moment(link.createdAt).fromNow()}
-                          </Typography>
-                        </Grid>
-
-                        <Grid item>
-                          <Chip key={i} label={`${link.clicks} clicks`} />
-                        </Grid>
+                        <Typography style={{ fontSize: "14px" }}>
+                          {moment(link.createdAt).fromNow()} by{" "}
+                          {link.postedBy.name}
+                        </Typography>
+                        <Chip key={i} label={`${link.clicks} clicks`} />
                       </Grid>
                       <Grid item xs={8}>
                         <Badge badgeContent="">
@@ -113,57 +128,69 @@ const User: InferGetServerSidePropsType<typeof getServerSideProps> = ({
     );
   };
 
-  const loadUserLinks = async () => {
-    const response = await axios.get(`/api/v1/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "content-type": "application/json",
-      },
-    });
-    setLinkState(response.data.data.links);
-  };
-
   return (
     <Layout>
       <Typography variant="h4" style={{ marginBottom: "1rem" }}>
-        {user.name}'s Dashboard /{" "}
-        <span style={{ color: "red" }}>{user.role}</span>{" "}
+        All links
       </Typography>
-      <Divider />
-      <Grid container spacing={3}>
-        <Grid container item direction="column" md={4}>
-          <List component="nav">
-            <ListItem>
-              <Link href="/user/link/create">
-                <a>
-                  <Typography>Submit a link</Typography>
-                </a>
-              </Link>
-            </ListItem>
-            <ListItem>
-              <Link href="/user/profile/update">
-                <a>
-                  <Typography>Update profile</Typography>
-                </a>
-              </Link>
-            </ListItem>
-          </List>
-        </Grid>
-        <Grid container item direction="column" md={8}>
-          <Typography variant={"h5"} style={{ marginTop: "1rem" }}>
-            Your Links
-          </Typography>
-          <Divider />
-          <Typography>{showListLinks()}</Typography>
+
+      <Grid container>
+        <Grid item xs={12}>
+          {showLinks()}
+          <div className="flex-center" style={{ marginTop: "1rem" }}>
+            <InfiniteScroll
+              pageStart={0}
+              loadMore={loadMore}
+              hasMore={linkCount > 0 && linkCount >= limit}
+              loader={
+                <img
+                  width="100px"
+                  height="100px"
+                  src="/images/loading.webp"
+                  alt="Loading..."
+                />
+              }
+            ></InfiniteScroll>
+          </div>
         </Grid>
       </Grid>
     </Layout>
   );
 };
 
+export const getLinks = async ({ user, token }) => {
+  let skip = 0;
+  let limit = 2;
+  let links;
+  try {
+    const response = await axios.post(
+      `${process.env.API_HOST}/api/v1/links/getAll`,
+      { skip, limit },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    links = response.data.data.links;
+  } catch (err) {
+    console.log("Get all links error", err);
+  }
+
+  return {
+    user,
+    token,
+    links,
+    linkLimit: limit,
+    linkSkip: skip,
+    totalLinks: links.length,
+  };
+};
+
 export const getServerSideProps: GetServerSideProps = pipeProps(
   withUser,
-  roleSubscriber
+  roleAdmin,
+  getLinks
 );
 
-export default User;
+export default AllLinksAdmin;

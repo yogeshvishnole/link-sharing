@@ -8,14 +8,14 @@ import catchAsync from '../utils/catch-async';
 import BusinessError from '../exceptions/business-error';
 
 export const register = catchAsync(async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, categories } = req.body;
 
   // check if user already  exists
   if (await User.findOne({ email })) {
     return next(new BusinessError('User with this email already exist!', 400));
   }
 
-  const payload = { name, email, password };
+  const payload = { name, email, password, categories };
 
   //  create the token
   const token = jwt.sign(payload, process.env.JWT_EMAIL_VERIFICATION, {
@@ -41,13 +41,13 @@ export const registerActivate = catchAsync(async (req, res, next) => {
     token,
     process.env.JWT_EMAIL_VERIFICATION,
   );
-  const { name, email, password } = decoded;
+  const { name, email, password, categories } = decoded;
   const username = nanoid();
   const user = await User.findOne({ email });
   if (user) {
     return next(new BusinessError('User with this email already exist!', 400));
   }
-  await User.create({ name, email, username, password });
+  await User.create({ name, email, username, password, categories });
 
   return res.status(201).json({
     status: constants.SUCCESS_STATUS,

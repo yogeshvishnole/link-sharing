@@ -29,3 +29,7 @@ export const resetPasswordValidator = [
     .withMessage('Password must be at least  6 characters long.'),
   check('resetPasswordLink').not().isEmpty().withMessage('Token is required'),
 ];
+
+export const userUpdateValidator = [
+  check('name').not().isEmpty().withMessage('Name is required'),
+];

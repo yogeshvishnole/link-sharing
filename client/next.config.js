@@ -3,7 +3,7 @@ module.exports = {
     return [
       {
         source: "/api/:page*",
-        destination: "http://localhost:5000/api/:page*", // Matched parameters can be used in the destination
+        destination: "http://localhost:4000/api/:page*", // Matched parameters can be used in the destination
       },
     ];
   },

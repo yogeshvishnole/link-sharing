@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 
-const userSchema = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema(
   {
     username: {
       type: String,
@@ -45,6 +47,13 @@ const userSchema = new mongoose.Schema(
       default: 'subscriber',
     },
     passwordChangedAt: Date,
+    categories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true,
+      },
+    ],
   },
   {
     timestamps: true,
@@ -55,6 +64,7 @@ userSchema
   .virtual('password')
   .set(function (password) {
     // create a temp variable
+    console.log('pass', password);
     this._password = password;
     // generate salt
     this.salt = this.makeSalt();

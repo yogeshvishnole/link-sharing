@@ -5,10 +5,11 @@ import { makeStyles, createStyles } from "@material-ui/core/styles";
 
 interface FormikFieldProps {
   name: string;
-  label: string;
+  label?: string;
   type?: string;
   required?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const FormikField: React.FC<FormikFieldProps> = ({
@@ -17,6 +18,7 @@ const FormikField: React.FC<FormikFieldProps> = ({
   type = "text",
   required = "false",
   placeholder = "",
+  disabled = false,
 }) => {
   const classes = useStyles();
   return (
@@ -24,6 +26,7 @@ const FormikField: React.FC<FormikFieldProps> = ({
       fullWidth
       name={name}
       label={label}
+      disabled={disabled}
       type={type}
       placeholder={placeholder}
       as={TextField}

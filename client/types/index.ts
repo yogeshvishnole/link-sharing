@@ -13,3 +13,16 @@ export interface LoginResponseType {
     user: UserType;
   };
 }
+
+export type linkType = "free" | "paid";
+
+export type linkMedium = "video" | "book";
+
+export interface Category {
+  name: string;
+  content: string;
+  image: {
+    url: string;
+    key: string;
+  };
+}

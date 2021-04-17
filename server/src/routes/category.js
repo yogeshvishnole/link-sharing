@@ -12,8 +12,8 @@ const router = express.Router();
 router
   .route('/')
   .post(
-    // categoryCreateValidator,
-    // runValidation,
+    categoryCreateValidator,
+    runValidation,
     protect,
     restrictTo('admin'),
     create,
@@ -29,7 +29,7 @@ router
     restrictTo('admin'),
     update,
   )
-  .get(read)
+  .post(read)
   .delete(protect, restrictTo('admin'), remove);
 
 export default router;

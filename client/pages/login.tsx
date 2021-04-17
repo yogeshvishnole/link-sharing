@@ -22,8 +22,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
 
     linkStyles: {
-      display: "block",
-      textAlign: "right",
+      // display: "inline-block",
+      // textAlign: "right",
       color: theme.palette.secondary.main,
     },
   })
@@ -134,11 +134,15 @@ const Login: React.FC<Props> = (props) => {
               </Form>
             )}
           </Formik>
-          <Link href="/auth/forgot-password" passHref>
-            <MaterialLink underline="hover" className={classes.linkStyles}>
-              <Typography>Forgot Password</Typography>
-            </MaterialLink>
-          </Link>
+          <Grid item style={{ textAlign: "right" }}>
+            <Typography>
+              <Link href="/auth/forgot-password" passHref>
+                <MaterialLink underline="hover" className={classes.linkStyles}>
+                  Forgot Password
+                </MaterialLink>
+              </Link>
+            </Typography>
+          </Grid>
         </Box>
       </Grid>
     </Layout>

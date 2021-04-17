@@ -41,7 +41,7 @@ const routes = [
   { name: "Home", link: "/", activeIndex: 0 },
   {
     name: "Submit a link",
-    link: "/submit-a-link",
+    link: "/user/link/create",
     activeIndex: 1,
   },
   {
@@ -90,7 +90,7 @@ const Layout: React.FC<Props> = ({ children }) => {
                   <ListItemText primary={"HOME"} />
                 </ListItem>
               </Link>
-              <Link href="/submit-a-link">
+              <Link href="/user/link/create">
                 <ListItem button className={classes.listItem}>
                   <ListItemText primary={"SUBMIT A LINK"} />
                 </ListItem>

@@ -2,17 +2,20 @@ import ses from '../services/aws-ses';
 import {
   emailVerificationTemplate,
   emailResetPasswordTemplate,
+  emailNewLinkTemplate,
 } from './email-templates';
 import {
   EMAIL_VERIFICATION_SUBJECT,
+  NEW_LINK_SUBJECT,
   RESET_PASSWORD_SUBJECT,
 } from './email-subjects.js';
 
 // In this class we can use open closed principle
 export default class Email {
-  constructor(email, token) {
+  constructor(email, token, data = {}) {
     this.email = email;
     this.token = token;
+    this.data = data;
   }
 
   constructParams(emailTemplateFunc, subject) {
@@ -24,7 +27,7 @@ export default class Email {
         Body: {
           Html: {
             Charset: 'UTF-8',
-            Data: emailTemplateFunc(this.token),
+            Data: emailTemplateFunc(this.token, this.data),
           },
         },
         Subject: {
@@ -52,6 +55,11 @@ export default class Email {
       emailResetPasswordTemplate,
       RESET_PASSWORD_SUBJECT,
     );
+    return await this.send(params);
+  }
+
+  async sendNewLinkCreated() {
+    const params = this.constructParams(emailNewLinkTemplate, NEW_LINK_SUBJECT);
     return await this.send(params);
   }
 }
